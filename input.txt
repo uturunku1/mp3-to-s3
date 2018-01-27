@@ -1,4 +1,7 @@
 {
-  "videoUrl": "lRs72x7Lgtc",
-  "bucket": "democracy-live"
+  "bucketDestination": "democracy-live",
+  "mediaSource":{
+    "videoUrl":"lRs72x7Lgtc",
+    "bucketSource":null
+  }
 }

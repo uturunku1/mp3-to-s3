@@ -39,5 +39,5 @@ Event structure:
 
 {
   "videoUrl": "lRs72x7Lgtc",
-  "bucket": "democracy-live"
+  "bucketDestination": "democracy-live"
 }
