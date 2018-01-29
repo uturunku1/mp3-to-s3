@@ -3,22 +3,24 @@
 const aws = require('aws-sdk');
 const fs = require('fs');
 var Downloader = require("./downloader");
+const normalizer = require('./normalizer');
+const child_process= require('child_process');
+const mp3Filename=`${(Date.now()).toString()}`+".mp3";
 const s3 = new aws.S3();
 var dl = new Downloader();
-const mp3Filename=`${(Date.now()).toString()}`+".mp3";
-const child_process= require('child_process');
 
 exports.handler=(event, context, callback)=>{
     const {videoUrl, bucketDestination} = event;
-    console.log(`The value of videoUrl is ${videoUrl}`);
+    console.log(`The youtube videoId is ${videoUrl}`);
     var i= 0;
     dl.getMP3({videoId: videoUrl, name: mp3Filename},function(error,data){
         i++;
         if(error) throw error;
         else{
-            console.log("Audio "+ i+" was downloaded: "+ data.file);
-            //normalize audio before saving
-            saveToS3(data.file, bucketDestination);
+            console.log("Audio "+ i+" was downloaded: "+ data.file); // data.file is /tmp/mp3Filename
+            normalizer.processMp3File(mp3Filename).then((val)=>{
+                saveToS3('/tmp/output-'+mp3Filename, bucketDestination);
+            });
         }
     });
     callback(null,'Uploading Alexa mp3 audio to S3...');

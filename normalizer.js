@@ -17,7 +17,7 @@ function execCommand(cmd) {
 }
 
 function measureLoudness(mp3File) {
-    const cmd = [`./ffmpeg -i input/${mp3File} -af loudnorm=I=-14:TP=-2:LRA=11:print_format=json -f null -`];
+    const cmd = [`./ffmpeg -i /tmp/${mp3File} -af loudnorm=I=-14:TP=-2:LRA=11:print_format=json -f null -`];
 
     return execCommand(cmd).then((response) => {
         //grab JSON str and make it into object
@@ -42,31 +42,35 @@ function measureLoudness(mp3File) {
 }
 
     function adjustForAlexa(mp3File, i, tp, lra, thresh, offset){
-        const cmd=[`ffmpeg -i input/${mp3File}`];
+        const cmd=[`./ffmpeg -i /tmp/${mp3File}`];
         cmd.push(`-af loudnorm=I=-14:TP=-2:LRA=11:measured_I=${i}:measured_TP=${tp}:measured_LRA=${lra}:measured_thresh=${thresh}:offset=${offset}:linear=true`);
         cmd.push('-codec:a libmp3lame'); // Format
         cmd.push('-ac 2'); // not sure...
         cmd.push('-b:a 48k'); // Bitrate
         cmd.push('-ar 16000'); // Sample rate
-        cmd.push(`-y output/${mp3File}`);
+        cmd.push(`-y /tmp/output-${mp3File}`);
 
         return execCommand(cmd).catch((err) => {
-            throw `Error when adjusting ${mp3File}`;
+            throw `Error when adjusting output-${mp3File}. Make sure ffmpeg is your path.`;
         });
     }
 
-    function processMp3File(mp3File) {
-        measureLoudness(mp3File).then((data)=>{
-            return adjustForAlexa(mp3File,data.input_i, data.input_tp, data.input_lra, data.input_thresh, data.target_offset);
-        }).then((done) => {
-            console.log(mp3File, 'was normalized succesfully');
-        }).catch((error) => {
-            console.log(error, mp3File+ ' was not normalized');;
+    exports.processMp3File= function (mp3File) {
+        return new Promise((resolve, reject)=>{
+            measureLoudness(mp3File).then((data)=>{
+                return adjustForAlexa(mp3File,data.input_i, data.input_tp, data.input_lra, data.input_thresh, data.target_offset);
+            }).then((done) => {
+                console.log(mp3File, 'was normalized succesfully');
+                resolve(mp3File);
+            }).catch((error) => {
+                console.log(error, mp3File+ ' was not normalized');
+                reject(error);
+            });
         });
     }
 
-    fs.readdirSync('input').forEach(file => {
+    // fs.readdirSync('input').forEach(file => {
         //skip hidden files
-        if(file[0] ==='.') return;
-        processMp3File(file);
-    });
+    //     if(file[0] ==='.') return;
+    //     processMp3File(file);
+    // });
