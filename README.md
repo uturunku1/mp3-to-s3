@@ -21,12 +21,12 @@ This Lambda function takes a youtube video Id (from a custom Event JSON object) 
 - Upload a file from Amazon S3: Code entry type
 - Runtime: `Node.js 6.10`
 - Handler: `index.handler`
-- Timeout: 33 sec
+- Timeout: 1 minute
 - Configure test event: with event structure given bellow
 
 ### Basic Settings
 
-Set the memory to `1536 MB`(XD) AND increase the timeout to `23 sec`.
+Set the memory to `1536 MB`(XD) AND increase the timeout to `1 minute`.
 
 ### Execution Role
 
